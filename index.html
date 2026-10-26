@@ -1,0 +1,63 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>EduMap — find local education resources</title>
+  <meta name="description" content="Open-source map of schools, libraries, tutoring, skills courses and more, with an optional local Gemma assistant." />
+  <link rel="stylesheet" href="/src/style.css" />
+</head>
+<body>
+  <header class="top">
+    <h1>EduMap</h1>
+    <p class="tag">Find learning resources near you</p>
+    <span id="badge" class="badge" hidden></span>
+  </header>
+  <div class="notice" id="notice" hidden></div>
+  <main>
+    <aside class="panel">
+      <form id="ask" class="ask">
+        <label for="q">Ask in plain words</label>
+        <div class="row">
+          <input id="q" placeholder="e.g. free evening English classes for adults" maxlength="300" />
+          <button id="askBtn" type="submit">Ask</button>
+        </div>
+        <p id="askNote" class="muted"></p>
+        <ul id="picks" class="picks"></ul>
+      </form>
+      <details class="filters" open>
+        <summary>Filters</summary>
+        <div class="grid">
+          <label>Search <input id="f-q" type="search" placeholder="name or keyword" /></label>
+          <label>Category <select id="f-category"><option value="">Any</option></select></label>
+          <label>Cost <select id="f-cost"><option value="">Any</option></select></label>
+          <label>Audience <select id="f-audience"><option value="">Any</option></select></label>
+          <label>Language <select id="f-language"><option value="">Any</option></select></label>
+        </div>
+        <button id="reset" type="button" class="link">Reset</button>
+      </details>
+      <p id="count" class="muted" aria-live="polite"></p>
+      <ul id="list" class="list"></ul>
+      <details id="addBox" class="add">
+        <summary>Add a resource</summary>
+        <form id="add">
+          <label>Name <input name="name" required minlength="3" maxlength="120" /></label>
+          <label>Category <select name="category" id="a-category" required></select></label>
+          <label>Cost <select name="cost" id="a-cost" required></select></label>
+          <label>Audience <select name="audience" id="a-audience" required></select></label>
+          <label>Languages (comma separated) <input name="languages" placeholder="English, Urdu" /></label>
+          <label>Address <input name="address" maxlength="200" /></label>
+          <label>Hours <input name="hours" maxlength="120" /></label>
+          <label>Website <input name="website" type="url" placeholder="https://" /></label>
+          <label>Description <textarea name="description" rows="3" maxlength="500"></textarea></label>
+          <p class="muted" id="pinNote">Click the map to place the pin.</p>
+          <button type="submit">Save resource</button>
+          <p id="addMsg" class="muted" role="status"></p>
+        </form>
+      </details>
+    </aside>
+    <div id="map" aria-label="Map of education resources"></div>
+  </main>
+  <script type="module" src="/src/main.ts"></script>
+</body>
+</html>

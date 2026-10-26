@@ -1,0 +1,9 @@
+services:
+  - type: web
+    name: edumap
+    runtime: docker
+    plan: free
+    healthCheckPath: /api/health
+    envVars:
+      - key: EDUMAP_READONLY
+        value: "1"

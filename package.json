@@ -1,0 +1,32 @@
+{
+  "name": "edumap",
+  "version": "1.0.0",
+  "description": "Open-source map of local education resources, with an optional local Gemma assistant (Ollama).",
+  "type": "module",
+  "license": "MIT",
+  "engines": {
+    "node": ">=22.5"
+  },
+  "scripts": {
+    "start": "vite build && tsx server/index.ts",
+    "serve": "tsx server/index.ts",
+    "dev": "tsx watch server/index.ts",
+    "dev:client": "vite",
+    "build": "vite build",
+    "test": "vitest run",
+    "typecheck": "tsc --noEmit"
+  },
+  "dependencies": {
+    "@hono/node-server": "^2.1.5",
+    "hono": "^4.13.14",
+    "leaflet": "^1.9.4"
+  },
+  "devDependencies": {
+    "@types/leaflet": "^1.9.22",
+    "@types/node": "^26.6.5",
+    "tsx": "^4.23.15",
+    "typescript": "^7.0.2",
+    "vite": "^8.3.5",
+    "vitest": "^5.0.5"
+  }
+}
