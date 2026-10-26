@@ -13,6 +13,7 @@
     "dev": "tsx watch server/index.ts",
     "dev:client": "vite",
     "build": "vite build",
+    "build:static": "VITE_STATIC=1 vite build --outDir dist-static",
     "test": "vitest run",
     "typecheck": "tsc --noEmit"
   },

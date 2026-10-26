@@ -1,11 +1,7 @@
 import L from 'leaflet';
 import 'leaflet/dist/leaflet.css';
-import type { AskResult, Resource } from '../shared/types.ts';
-
-interface Meta {
-  categories: string[]; costs: string[]; audiences: string[]; languages: string[];
-  total: number; readOnly: boolean; ai: { available: boolean; model: string };
-}
+import type { Resource } from '../shared/types.ts';
+import { addResource, askQuestion, getMeta, getResources, type Meta } from './api.ts';
 
 const $ = <T extends HTMLElement>(id: string) => document.getElementById(id) as T;
 const esc = (s: string) => s.replace(/[&<>"']/g, (c) => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' })[c]!);
@@ -56,29 +52,29 @@ function highlight(id: number, pan: boolean) {
 
 const val = (id: string) => (document.getElementById(id) as HTMLInputElement).value;
 async function load() {
-  const p = new URLSearchParams();
-  for (const [k, id] of [['q', 'f-q'], ['category', 'f-category'], ['cost', 'f-cost'], ['audience', 'f-audience'], ['language', 'f-language']] as const) {
-    if (val(id)) p.set(k, val(id));
-  }
-  render(await (await fetch(`/api/resources?${p}`)).json());
+  render(await getResources({
+    q: val('f-q') || undefined, category: val('f-category') || undefined, cost: (val('f-cost') || undefined) as Resource['cost'] | undefined,
+    audience: (val('f-audience') || undefined) as Resource['audience'] | undefined, language: val('f-language') || undefined,
+  }));
 }
 
-function fill(id: string, values: string[], anyOption: boolean) {
+function fill(id: string, values: readonly string[], anyOption: boolean) {
   $<HTMLSelectElement>(id).innerHTML = (anyOption ? '<option value="">Any</option>' : '') + values.map((v) => `<option value="${esc(v)}">${esc(label(v))}</option>`).join('');
 }
 
 async function init() {
-  meta = await (await fetch('/api/meta')).json();
+  meta = await getMeta();
   fill('f-category', meta.categories, true); fill('f-cost', meta.costs, true);
   fill('f-audience', meta.audiences, true); fill('f-language', meta.languages, true);
   fill('a-category', meta.categories, false); fill('a-cost', meta.costs, false); fill('a-audience', meta.audiences, false);
   const badge = $('badge');
   badge.hidden = false;
-  badge.textContent = meta.ai.available ? `AI: ${meta.ai.model} (local)` : 'AI off: search only';
+  badge.textContent = meta.ai.available ? `AI: ${meta.ai.model} (local)` : meta.static ? 'Static demo: keyword search' : 'AI off: search only';
   badge.classList.toggle('on', meta.ai.available);
   $('notice').hidden = false;
   $('notice').textContent = 'Demo data: every resource shown is fictional, placed around an arbitrary map centre. Replace it with real local data to use EduMap.';
-  $('askNote').textContent = meta.ai.available ? 'Answered by an open-weight Gemma model running locally.' : 'No local model detected, so questions use simple keyword matching.';
+  $('askNote').textContent = meta.ai.available ? 'Answered by an open-weight Gemma model running locally.'
+    : meta.static ? 'This hosted demo uses keyword matching. Run EduMap locally with Ollama to get Gemma.' : 'No local model detected, so questions use simple keyword matching.';
   if (meta.readOnly) $('addBox').hidden = true;
   await load();
 }
@@ -101,8 +97,7 @@ $('ask').addEventListener('submit', async (e) => {
   const btn = $<HTMLButtonElement>('askBtn');
   btn.disabled = true; btn.textContent = 'Thinking…';
   try {
-    const res = await fetch('/api/ask', { method: 'POST', headers: { 'content-type': 'application/json' }, body: JSON.stringify({ question: q }) });
-    const out: AskResult = await res.json();
+    const out = await askQuestion(q);
     render(out.results);
     const names = new Map(out.results.map((r) => [r.id, r.name]));
     $('picks').innerHTML = out.picks.map((p) => `<li class="why" data-id="${p.id}"><strong>${esc(names.get(p.id) ?? '')}</strong>: ${esc(p.why)}</li>`).join('');
@@ -131,9 +126,8 @@ $('add').addEventListener('submit', async (e) => {
     ...Object.fromEntries(fd), languages: String(fd.get('languages') ?? '').split(',').map((s) => s.trim()).filter(Boolean),
     lat: pin.getLatLng().lat, lng: pin.getLatLng().lng,
   };
-  const res = await fetch('/api/resources', { method: 'POST', headers: { 'content-type': 'application/json' }, body: JSON.stringify(body) });
-  const out = await res.json();
-  if (!res.ok) { msg.textContent = out.error; return; }
+  const out = await addResource(body as never);
+  if (!out.ok) { msg.textContent = out.error ?? 'Could not save.'; return; }
   msg.textContent = 'Saved.';
   (e.target as HTMLFormElement).reset();
   pin.remove(); pin = null;

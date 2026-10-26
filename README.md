@@ -68,9 +68,11 @@ Stack: TypeScript, Hono, `node:sqlite`, Vite, Leaflet. Small enough to read in o
 
 Map tiles are loaded from OpenStreetMap, so the map needs an internet connection; the rest works offline.
 
-## Deploy a free demo
+## Live demo
 
-A `Dockerfile` and [`render.yaml`](render.yaml) are included. The hosted demo runs read-only and without the AI assistant (no GPU, no Ollama), so questions use the keyword fallback; run it locally to get Gemma.
+**https://muhammadmurtuzahussain.github.io/EduMap/** is a static build (`npm run build:static`) deployed to GitHub Pages by [`.github/workflows/pages.yml`](.github/workflows/pages.yml). It bundles the fictional seed data and runs entirely in the browser, with keyword search only. Adding resources and the Gemma assistant need the server, so run EduMap locally for those.
+
+To host the full server instead, a `Dockerfile` and [`render.yaml`](render.yaml) are included (read-only, no AI; untested).
 
 ## Adding your own data
 
